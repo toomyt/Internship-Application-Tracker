@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ApplyTrack - Job Application Tracker</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f9fafb;
+      color: #111827;
+      line-height: 1.6;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Navbar */
+    header {
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #4f46e5;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 25px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      font-size: 16px;
+      color: #374151;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 22px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .btn-primary {
+      background-color: #4f46e5;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #4338ca;
+    }
+
+    .btn-secondary {
+      border: 1px solid #4f46e5;
+      color: #4f46e5;
+      background-color: white;
+    }
+
+    .btn-secondary:hover {
+      background-color: #eef2ff;
+    }
+
+    /* Hero */
+    .hero {
+      padding: 80px 0;
+      background: white;
+    }
+
+    .hero-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .hero-text {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .hero-text h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+      color: #111827;
+    }
+
+    .hero-text p {
+      font-size: 18px;
+      margin-bottom: 30px;
+      color: #4b5563;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .hero-image {
+      flex: 1;
+      min-width: 300px;
+      background: #eef2ff;
+      border: 2px dashed #c7d2fe;
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .hero-image h3 {
+      margin-bottom: 15px;
+      color: #3730a3;
+    }
+
+    /* Section */
+    section {
+      padding: 70px 0;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 34px;
+      margin-bottom: 20px;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: #6b7280;
+      margin-bottom: 50px;
+      font-size: 17px;
+    }
+
+    /* Problem / Solution */
+    .two-column {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      flex: 1;
+      min-width: 280px;
+      background: white;
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .card h3 {
+      margin-bottom: 15px;
+      font-size: 24px;
+    }
+
+    .card ul {
+      padding-left: 20px;
+    }
+
+    .card ul li {
+      margin-bottom: 10px;
+      color: #374151;
+    }
+
+    /* Features */
+    .features-grid {
+      display: flex;
+      gap: 25px;
+      flex-wrap: wrap;
+    }
+
+    .feature-card {
+      flex: 1;
+      min-width: 250px;
+      background: white;
+      padding: 25px;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      text-align: center;
+    }
+
+    .feature-card h3 {
+      margin-bottom: 12px;
+      color: #111827;
+    }
+
+    .feature-card p {
+      color: #6b7280;
+    }
+
+    /* Dashboard Preview */
+    .dashboard-preview {
+      background: white;
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table th,
+    table td {
+      padding: 14px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    table th {
+      background-color: #f3f4f6;
+    }
+
+    /* CTA */
+    .cta {
+      background-color: #4f46e5;
+      color: white;
+      text-align: center;
+      border-radius: 16px;
+      padding: 60px 20px;
+    }
+
+    .cta h2 {
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+
+    .cta p {
+      margin-bottom: 25px;
+      font-size: 18px;
+    }
+
+    .cta .btn-primary {
+      background-color: white;
+      color: #4f46e5;
+    }
+
+    .cta .btn-primary:hover {
+      background-color: #e5e7eb;
+    }
+
+    /* Footer */
+    footer {
+      background: white;
+      border-top: 1px solid #e5e7eb;
+      padding: 30px 0;
+      margin-top: 60px;
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: #4b5563;
+    }
+
+    @media (max-width: 768px) {
+      .navbar,
+      .hero-content,
+      .two-column,
+      .features-grid,
+      .footer-content {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero-text h1 {
+        font-size: 36px;
+      }
+
+      .section-title {
+        font-size: 28px;
+      }
+
+      .cta h2 {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header>
+    <div class="container navbar">
+      <div class="logo">ApplyTrack</div>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#dashboard">Dashboard</a>
+        <a href="#about">About</a>
+        <a href="#" class="btn btn-secondary">Login</a>
+        <a href="#" class="btn btn-primary">Sign Up</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container hero-content">
+      <div class="hero-text">
+        <h1>Track your job applications. Land offers faster.</h1>
+        <p>
+          Stay organized during recruiting season by managing applications,
+          tracking statuses, and saving important notes all in one place.
+        </p>
+        <div class="hero-buttons">
+          <a href="#" class="btn btn-primary">Get Started Free</a>
+          <a href="#" class="btn btn-secondary">View Demo</a>
+        </div>
+      </div>
+
+      <div class="hero-image">
+        <h3>Dashboard Preview</h3>
+        <p>Mockup image or screenshot goes here</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem / Solution -->
+  <section>
+    <div class="container">
+      <h2 class="section-title">Applying shouldn’t feel chaotic</h2>
+      <p class="section-subtitle">
+        Keep everything organized so you can focus on landing interviews.
+      </p>
+
+      <div class="two-column">
+        <div class="card">
+          <h3>The Problem</h3>
+          <ul>
+            <li>Losing track of applications</li>
+            <li>Forgetting follow-up dates</li>
+            <li>Scattered notes across different apps</li>
+            <li>No clear view of recruiting progress</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>The Solution</h3>
+          <ul>
+            <li>Centralized application dashboard</li>
+            <li>Track each stage of the process</li>
+            <li>Store notes and recruiter details</li>
+            <li>Stay consistent and organized</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features">
+    <div class="container">
+      <h2 class="section-title">Core Features</h2>
+      <p class="section-subtitle">
+        Everything you need for a simple MVP application tracker.
+      </p>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>Application Tracking</h3>
+          <p>Add companies, roles, dates applied, and keep all your applications in one place.</p>
+        </div>
+
+        <div class="feature-card">
+          <h3>Status Management</h3>
+          <p>Track progress from Applied to Interview, Offer, or Rejected.</p>
+        </div>
+
+        <div class="feature-card">
+          <h3>Notes & Contacts</h3>
+          <p>Save recruiter contact info, reminders, and interview notes for each application.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dashboard Preview -->
+  <section id="dashboard">
+    <div class="container">
+      <h2 class="section-title">Everything you need, in one dashboard</h2>
+      <p class="section-subtitle">
+        View all your applications in one organized place.
+      </p>
+
+      <div class="dashboard-preview">
+        <table>
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Date Applied</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Google</td>
+              <td>Software Engineer Intern</td>
+              <td>Applied</td>
+              <td>Mar 20, 2026</td>
+            </tr>
+            <tr>
+              <td>Amazon</td>
+              <td>SDE Intern</td>
+              <td>Interview</td>
+              <td>Mar 24, 2026</td>
+            </tr>
+            <tr>
+              <td>Meta</td>
+              <td>Frontend Intern</td>
+              <td>Offer</td>
+              <td>Mar 27, 2026</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- About / Value -->
+  <section id="about">
+    <div class="container">
+      <h2 class="section-title">Built for students chasing internships</h2>
+      <p class="section-subtitle">
+        ApplyTrack helps internship seekers stay focused, organized, and consistent throughout recruiting season.
+      </p>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>Stay Organized</h3>
+          <p>Manage companies, roles, and deadlines without messy spreadsheets.</p>
+        </div>
+
+        <div class="feature-card">
+          <h3>Save Time</h3>
+          <p>Quickly check where you stand with each company in seconds.</p>
+        </div>
+
+        <div class="feature-card">
+          <h3>Increase Consistency</h3>
+          <p>Keep a steady application process and avoid missing follow-ups.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section>
+    <div class="container">
+      <div class="cta">
+        <h2>Ready to land your next offer?</h2>
+        <p>Start tracking your applications and stay on top of recruiting season.</p>
+        <a href="#" class="btn btn-primary">Get Started Free</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container footer-content">
+      <div>
+        <h3 class="logo">ApplyTrack</h3>
+        <p>Track internships. Stay organized. Land offers.</p>
+      </div>
+
+      <div class="footer-links">
+        <a href="#features">Features</a>
+        <a href="#dashboard">Dashboard</a>
+        <a href="#about">About</a>
+        <a href="#">GitHub</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
