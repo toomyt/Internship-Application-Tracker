@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ApplyTrack — Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    html, body { height:100%; background:var(--bg-alt); overflow:hidden; }
+
+    .shell { display:flex; height:100vh; }
+
+    .sidebar {
+      width:220px; flex-shrink:0;
+      background:var(--bg);
+      border-right:1px solid var(--border);
+      display:flex; flex-direction:column;
+      padding:0;
+      z-index:10;
+    }
+    .sb-logo {
+      display:flex; align-items:center; gap:8px;
+      padding:20px 20px 16px;
+      font-family:var(--font-display);
+      font-weight:700; font-size:17px;
+      color:var(--purple-600);
+      border-bottom:1px solid var(--border);
+    }
+    .sb-logo-dot { width:7px;height:7px;border-radius:50%;background:var(--purple-600); }
+    .sb-nav { flex:1; padding:12px 10px; display:flex; flex-direction:column; gap:2px; }
+    .sb-link {
+      display:flex; align-items:center; gap:10px;
+      padding:9px 12px; border-radius:var(--radius-md);
+      font-size:13px; font-weight:500; color:var(--muted);
+      cursor:pointer; transition:all var(--ease); border:none; background:none;
+      font-family:var(--font-body); text-align:left; width:100%;
+    }
+    .sb-link:hover { background:var(--bg-alt); color:var(--text); }
+    .sb-link.active { background:var(--purple-50); color:var(--purple-600); }
+    .sb-link svg { flex-shrink:0; }
+    .sb-section { font-size:10px; font-weight:700; color:var(--gray-400); letter-spacing:.08em; text-transform:uppercase; padding:12px 12px 4px; }
+    .sb-footer { padding:16px; border-top:1px solid var(--border); }
+    .sb-user { display:flex; align-items:center; gap:10px; }
+    .sb-avatar { width:32px;height:32px;border-radius:50%;background:var(--purple-100);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--purple-800); }
+    .sb-user-name { font-size:13px;font-weight:600;color:var(--text); }
+    .sb-user-sub  { font-size:11px;color:var(--muted); }
+
+    .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+
+    .topbar {
+      background:var(--bg); border-bottom:1px solid var(--border);
+      padding:0 28px; height:56px; flex-shrink:0;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .topbar-title { font-family:var(--font-display); font-size:16px; font-weight:700; color:var(--text); }
+    .topbar-actions { display:flex; gap:8px; align-items:center; }
+
+    .content { flex:1; overflow-y:auto; padding:24px 28px; }
+
+    .view { display:none; }
+    .view.active { display:block; }
+
+    .metrics-row { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:20px; }
+    .metric-card {
+      background:var(--bg); border:1px solid var(--border);
+      border-radius:var(--radius-lg); padding:16px 18px;
+    }
+    .metric-card-num { font-family:var(--font-display); font-size:26px; font-weight:700; color:var(--purple-600); }
+    .metric-card-label { font-size:11px; color:var(--muted); margin-top:2px; }
+    .metric-card-sub { font-size:11px; color:var(--muted); margin-top:6px; }
+
+    .deadline-strip {
+      background:var(--bg); border:1px solid var(--border);
+      border-radius:var(--radius-lg); padding:12px 18px;
+      margin-bottom:20px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    }
+    .deadline-strip-label { font-size:12px; font-weight:700; color:var(--text); flex-shrink:0; }
+    .deadline-pill {
+      display:inline-flex; align-items:center; gap:5px;
+      font-size:11px; padding:3px 10px; border-radius:var(--radius-pill);
+      font-weight:600; cursor:pointer;
+    }
+    .deadline-pill.overdue { background:var(--color-rejected-bg); color:var(--color-rejected-text); }
+    .deadline-pill.soon    { background:var(--color-interview-bg); color:var(--color-interview-text); }
+    .deadline-pill.ok      { background:var(--color-offer-bg); color:var(--color-offer-text); }
+    .deadline-empty { font-size:12px; color:var(--muted); }
+
+    .table-card {
+      background:var(--bg); border:1px solid var(--border);
+      border-radius:var(--radius-lg); overflow:hidden;
+    }
+    .table-card-head {
+      padding:12px 18px; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    }
+    .table-search {
+      flex:1; min-width:160px; max-width:260px;
+      border:1px solid var(--border); border-radius:var(--radius-md);
+      padding:7px 12px 7px 34px; font-size:13px; font-family:var(--font-body);
+      background:var(--bg-alt); color:var(--text); outline:none;
+      transition:border-color var(--ease);
+    }
+    .table-search:focus { border-color:var(--purple-400); }
+    .search-wrap { position:relative; flex:1; max-width:260px; }
+    .search-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--muted); pointer-events:none; }
+    .filter-select {
+      border:1px solid var(--border); border-radius:var(--radius-md);
+      padding:7px 10px; font-size:12px; font-family:var(--font-body);
+      color:var(--text); background:var(--bg-alt); outline:none; cursor:pointer;
+    }
+    .tbl { width:100%; border-collapse:collapse; font-size:13px; }
+    .tbl th { padding:10px 16px; text-align:left; font-size:11px; font-weight:700; color:var(--muted); border-bottom:1px solid var(--border); background:var(--bg-alt); white-space:nowrap; }
+    .tbl td { padding:11px 16px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
+    .tbl tr:last-child td { border-bottom:none; }
+    .tbl tr.app-row { transition:background var(--ease); cursor:pointer; }
+    .tbl tr.app-row:hover td { background:var(--bg-alt); }
+    .co-initial { width:28px;height:28px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:8px;vertical-align:middle;flex-shrink:0; }
+    .co-name { font-weight:600; }
+    .tbl-empty { padding:48px; text-align:center; color:var(--muted); font-size:14px; }
+
+    .s-badge { display:inline-block; font-size:10px; font-weight:700; padding:3px 9px; border-radius:var(--radius-pill); white-space:nowrap; }
+    .s-wishlist   { background:#F3E8FF; color:#6B21A8; }
+    .s-applied    { background:var(--color-applied-bg);   color:var(--color-applied-text); }
+    .s-oa         { background:#FEF3C7; color:#92400E; }
+    .s-phone      { background:#DBEAFE; color:#1E40AF; }
+    .s-interview  { background:var(--color-interview-bg); color:var(--color-interview-text); }
+    .s-offer      { background:var(--color-offer-bg);     color:var(--color-offer-text); }
+    .s-rejected   { background:var(--color-rejected-bg);  color:var(--color-rejected-text); }
+    .s-withdrawn  { background:var(--gray-100); color:var(--gray-500); }
+
+    .row-actions { display:flex; gap:4px; opacity:0; transition:opacity var(--ease); }
+    .tbl tr.app-row:hover .row-actions { opacity:1; }
+    .row-btn { border:none; background:none; cursor:pointer; padding:4px 6px; border-radius:var(--radius-sm); color:var(--muted); transition:all var(--ease); }
+    .row-btn:hover { background:var(--bg-alt); color:var(--text); }
+    .row-btn.del:hover { color:var(--color-error); }
+
+    .modal-backdrop {
+      position:fixed; inset:0; background:rgba(0,0,0,0.35);
+      z-index:200; display:none; align-items:center; justify-content:center;
+      backdrop-filter:blur(2px);
+    }
+    .modal-backdrop.open { display:flex; }
+    .modal {
+      background:var(--bg); border-radius:var(--radius-xl);
+      width:100%; max-width:600px; max-height:90vh;
+      overflow-y:auto; box-shadow:var(--shadow-lg);
+      animation:modalIn .2s ease;
+    }
+    @keyframes modalIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .modal-head {
+      padding:20px 24px 16px; border-bottom:1px solid var(--border);
+      display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; background:var(--bg); z-index:1;
+    }
+    .modal-title { font-family:var(--font-display); font-size:17px; font-weight:700; color:var(--text); }
+    .modal-close { border:none; background:none; cursor:pointer; color:var(--muted); padding:4px; border-radius:var(--radius-sm); display:flex; align-items:center; transition:color var(--ease); }
+    .modal-close:hover { color:var(--text); }
+    .modal-body { padding:20px 24px; }
+    .modal-footer { padding:16px 24px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px; }
+
+    .modal-tabs { display:flex; gap:2px; border-bottom:1px solid var(--border); margin:-20px -24px 20px; padding:0 24px; }
+    .modal-tab { padding:10px 14px; font-size:13px; font-weight:600; color:var(--muted); cursor:pointer; border:none; background:none; border-bottom:2px solid transparent; margin-bottom:-1px; transition:all var(--ease); font-family:var(--font-body); }
+    .modal-tab.active { color:var(--purple-600); border-bottom-color:var(--purple-600); }
+    .modal-tab-panel { display:none; }
+    .modal-tab-panel.active { display:block; }
+
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .form-grid.single { grid-template-columns:1fr; }
+    .f-group { display:flex; flex-direction:column; gap:5px; }
+    .f-group.span2 { grid-column:1/-1; }
+    .f-label { font-size:12px; font-weight:600; color:var(--gray-700); }
+    .f-input, .f-select, .f-textarea {
+      border:1px solid var(--border); border-radius:var(--radius-md);
+      padding:9px 12px; font-size:13px; font-family:var(--font-body);
+      color:var(--text); background:var(--bg); outline:none;
+      transition:border-color var(--ease), box-shadow var(--ease);
+      width:100%;
+    }
+    .f-input:focus, .f-select:focus, .f-textarea:focus {
+      border-color:var(--purple-400);
+      box-shadow:0 0 0 3px rgba(83,74,183,0.09);
+    }
+    .f-textarea { resize:vertical; min-height:90px; }
+    .f-section { font-size:11px; font-weight:700; color:var(--purple-600); letter-spacing:.07em; text-transform:uppercase; margin:16px 0 10px; border-top:1px solid var(--border); padding-top:14px; }
+
+    .note-list { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+    .note-item { background:var(--bg-alt); border:1px solid var(--border); border-radius:var(--radius-md); padding:10px 12px; }
+    .note-item-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:3px; }
+    .note-item-date { font-size:11px; color:var(--muted); }
+    .note-item-text { font-size:13px; color:var(--text); }
+    .note-del { border:none; background:none; cursor:pointer; color:var(--muted); font-size:14px; line-height:1; }
+    .note-del:hover { color:var(--color-error); }
+    .note-add-row { display:flex; gap:8px; }
+    .note-add-row .f-input { flex:1; }
+
+    .doc-list { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+    .doc-item { background:var(--bg-alt); border:1px solid var(--border); border-radius:var(--radius-md); padding:10px 12px; display:flex; align-items:center; gap:10px; }
+    .doc-icon { color:var(--purple-400); flex-shrink:0; }
+    .doc-name { font-size:13px; font-weight:600; color:var(--text); flex:1; }
+    .doc-type { font-size:11px; color:var(--muted); }
+    .doc-link { font-size:12px; color:var(--purple-600); word-break:break-all; }
+    .doc-del { border:none; background:none; cursor:pointer; color:var(--muted); margin-left:auto; }
+    .doc-del:hover { color:var(--color-error); }
+
+    .analytics-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:20px; }
+    .chart-card { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-lg); padding:20px; }
+    .chart-card.full { grid-column:1/-1; }
+    .chart-title { font-family:var(--font-display); font-size:14px; font-weight:700; color:var(--text); margin-bottom:4px; }
+    .chart-sub { font-size:12px; color:var(--muted); margin-bottom:16px; }
+    .chart-wrap { position:relative; }
+
+    .funnel { display:flex; flex-direction:column; gap:6px; }
+    .funnel-row { display:flex; align-items:center; gap:10px; }
+    .funnel-label { font-size:12px; color:var(--text); width:90px; flex-shrink:0; font-weight:500; }
+    .funnel-bar-wrap { flex:1; background:var(--bg-alt); border-radius:var(--radius-pill); height:20px; overflow:hidden; }
+    .funnel-bar { height:100%; border-radius:var(--radius-pill); background:var(--purple-400); transition:width .8s cubic-bezier(.22,1,.36,1); display:flex; align-items:center; padding:0 8px; }
+    .funnel-count { font-size:11px; font-weight:700; color:#fff; white-space:nowrap; }
+    .funnel-pct { font-size:11px; color:var(--muted); width:36px; text-align:right; flex-shrink:0; }
+
+    .dist-list { display:flex; flex-direction:column; gap:8px; }
+    .dist-row { display:flex; align-items:center; gap:8px; }
+    .dist-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
+    .dist-name { font-size:12px; color:var(--text); flex:1; }
+    .dist-count { font-size:12px; font-weight:700; color:var(--text); }
+    .dist-pct { font-size:11px; color:var(--muted); width:32px; text-align:right; }
+
+    .reminder-list { display:flex; flex-direction:column; gap:10px; }
+    .reminder-card {
+      background:var(--bg); border:1px solid var(--border);
+      border-radius:var(--radius-lg); padding:16px 18px;
+      display:flex; align-items:center; gap:14px;
+    }
+    .reminder-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
+    .reminder-company { font-size:14px;font-weight:700;color:var(--text); }
+    .reminder-desc { font-size:12px;color:var(--muted); }
+    .reminder-date { font-size:12px;font-weight:600;margin-left:auto;white-space:nowrap; }
+    .reminder-empty { text-align:center; padding:48px; color:var(--muted); font-size:14px; }
+
+    .btn-sm {
+      padding:7px 14px; border-radius:var(--radius-md);
+      font-size:13px; font-weight:600; cursor:pointer;
+      font-family:var(--font-display); border:none; transition:all var(--ease);
+    }
+    .btn-sm.primary { background:var(--purple-600); color:#fff; }
+    .btn-sm.primary:hover { background:var(--purple-800); }
+    .btn-sm.ghost { background:transparent; color:var(--muted); border:1px solid var(--border); }
+    .btn-sm.ghost:hover { background:var(--bg-alt); color:var(--text); }
+    .btn-sm.danger { background:var(--color-rejected-bg); color:var(--color-error); border:1px solid #F0C0C0; }
+    .btn-sm.danger:hover { background:#fce4e4; }
+
+    .toast {
+      position:fixed; bottom:24px; right:24px; z-index:999;
+      background:var(--bg); border:1px solid var(--purple-200);
+      border-radius:var(--radius-lg); padding:12px 18px;
+      display:flex; align-items:center; gap:8px; font-size:13px;
+      box-shadow:var(--shadow-lg); color:var(--text);
+      transform:translateY(60px); opacity:0;
+      transition:all .3s cubic-bezier(.34,1.56,.64,1);
+    }
+    .toast.show { transform:translateY(0); opacity:1; }
+    .toast-icon { color:var(--color-offer-text); }
+
+    @media(max-width:900px){
+      .sidebar { display:none; }
+      .metrics-row { grid-template-columns:repeat(3,1fr); }
+      .analytics-grid { grid-template-columns:1fr; }
+    }
+    @media(max-width:600px){
+      .metrics-row { grid-template-columns:1fr 1fr; }
+      .form-grid { grid-template-columns:1fr; }
+      .form-grid .f-group.span2 { grid-column:auto; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sb-logo"><span class="sb-logo-dot"></span> ApplyTrack</div>
+    <nav class="sb-nav">
+      <div class="sb-section">Main</div>
+      <button class="sb-link active" onclick="showView('applications',this)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Applications
+      </button>
+      <button class="sb-link" onclick="showView('reminders',this)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Reminders
+      </button>
+      <div class="sb-section">Insights</div>
+      <button class="sb-link" onclick="showView('analytics',this)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        Analytics
+      </button>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="sb-avatar">TT</div>
+        <div>
+          <div class="sb-user-name">Thomas Tran</div>
+          <div class="sb-user-sub">thomas@uni.edu</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Applications</div>
+      <div class="topbar-actions">
+        <button class="btn-sm ghost" id="export-btn" onclick="exportCSV()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;vertical-align:middle"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+        <button class="btn-sm primary" id="add-btn" onclick="openAdd()">+ Add Application</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="view active" id="view-applications">
+
+        <div class="metrics-row">
+          <div class="metric-card">
+            <div class="metric-card-num" id="m-total">0</div>
+            <div class="metric-card-label">Total applications</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-card-num" id="m-active">0</div>
+            <div class="metric-card-label">In progress</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-card-num" id="m-interview">0</div>
+            <div class="metric-card-label">Interviews</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-card-num" id="m-offer">0</div>
+            <div class="metric-card-label">Offers</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-card-num" id="m-response">0%</div>
+            <div class="metric-card-label">Response rate</div>
+          </div>
+        </div>
+
+        <div class="deadline-strip">
+          <span class="deadline-strip-label">⏰ Upcoming deadlines</span>
+          <div id="deadline-pills"><span class="deadline-empty">No deadlines set</span></div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-card-head">
+            <div class="search-wrap">
+              <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="table-search" id="search-input" type="search" placeholder="Search company or role…" oninput="renderTable()"/>
+            </div>
+            <select class="filter-select" id="status-filter" onchange="renderTable()">
+              <option value="">All statuses</option>
+              <option>Wishlist</option>
+              <option>Applied</option>
+              <option>Online Assessment</option>
+              <option>Phone Screen</option>
+              <option>Interview</option>
+              <option>Offer</option>
+              <option>Rejected</option>
+              <option>Withdrawn</option>
+            </select>
+            <select class="filter-select" id="sort-select" onchange="renderTable()">
+              <option value="date-desc">Newest first</option>
+              <option value="date-asc">Oldest first</option>
+              <option value="company">Company A–Z</option>
+              <option value="deadline">Deadline soonest</option>
+            </select>
+          </div>
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Date Applied</th>
+                <th>Deadline</th>
+                <th>Source</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="app-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="view" id="view-reminders">
+        <div id="reminder-content"></div>
+      </div>
+
+      <div class="view" id="view-analytics">
+        <div class="metrics-row" style="grid-template-columns:repeat(4,1fr);">
+          <div class="metric-card">
+            <div class="metric-card-num" id="a-total">0</div>
+            <div class="metric-card-label">Total applications</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-card-num" id="a-response">0%</div>
+            <div class="metric-card-label">Response rate</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-card-num" id="a-interview-rate">0%</div>
+            <div class="metric-card-label">Interview rate</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-card-num" id="a-offer-rate">0%</div>
+            <div class="metric-card-label">Offer rate</div>
+          </div>
+        </div>
+
+        <div class="analytics-grid">
+          <div class="chart-card full">
+            <div class="chart-title">Application timeline</div>
+            <div class="chart-sub">Applications submitted per week over your recruiting season</div>
+            <div class="chart-wrap" style="height:220px"><canvas id="timeline-chart"></canvas></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-title">Application funnel</div>
+            <div class="chart-sub">Stage-by-stage conversion breakdown</div>
+            <div class="funnel" id="funnel-bars"></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-title">Status distribution</div>
+            <div class="chart-sub">How your applications are distributed right now</div>
+            <div class="chart-wrap" style="height:180px;margin-bottom:14px"><canvas id="dist-chart"></canvas></div>
+            <div class="dist-list" id="dist-list"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="app-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title">Add Application</div>
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tabs" id="modal-tabs-bar">
+        <button class="modal-tab active" onclick="switchModalTab('details',this)">Details</button>
+        <button class="modal-tab" onclick="switchModalTab('contacts',this)">Contacts & Notes</button>
+        <button class="modal-tab" onclick="switchModalTab('docs',this)">Documents</button>
+        <button class="modal-tab" onclick="switchModalTab('deadline',this)">Deadlines</button>
+      </div>
+
+      <div class="modal-tab-panel active" id="tab-details">
+        <div class="form-grid">
+          <div class="f-group">
+            <label class="f-label">Company name *</label>
+            <input class="f-input" id="f-company" placeholder="e.g. Google"/>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Role title *</label>
+            <input class="f-input" id="f-role" placeholder="e.g. Software Engineer Intern"/>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Status</label>
+            <select class="f-select" id="f-status">
+              <option>Wishlist</option>
+              <option selected>Applied</option>
+              <option>Online Assessment</option>
+              <option>Phone Screen</option>
+              <option>Interview</option>
+              <option>Offer</option>
+              <option>Rejected</option>
+              <option>Withdrawn</option>
+            </select>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Date applied</label>
+            <input class="f-input" id="f-date" type="date"/>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Application source</label>
+            <select class="f-select" id="f-source">
+              <option value="">— select —</option>
+              <option>LinkedIn</option>
+              <option>Company website</option>
+              <option>Handshake</option>
+              <option>Indeed</option>
+              <option>Referral</option>
+              <option>Career fair</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Job posting URL</label>
+            <input class="f-input" id="f-url" type="url" placeholder="https://…"/>
+          </div>
+          <div class="f-group span2">
+            <label class="f-label">General notes</label>
+            <textarea class="f-textarea" id="f-notes" placeholder="Any observations about this role, company culture, etc."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-tab-panel" id="tab-contacts">
+        <div class="f-section" style="border-top:none;padding-top:0;margin-top:0">Recruiter / Contact</div>
+        <div class="form-grid">
+          <div class="f-group">
+            <label class="f-label">Name</label>
+            <input class="f-input" id="f-contact-name" placeholder="Sarah Kim"/>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Title</label>
+            <input class="f-input" id="f-contact-title" placeholder="University Recruiter"/>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Email</label>
+            <input class="f-input" id="f-contact-email" type="email" placeholder="sarah@company.com"/>
+          </div>
+          <div class="f-group">
+            <label class="f-label">LinkedIn</label>
+            <input class="f-input" id="f-contact-linkedin" placeholder="linkedin.com/in/…"/>
+          </div>
+        </div>
+        <div class="f-section">Interaction Log</div>
+        <div class="note-list" id="note-list"></div>
+        <div class="note-add-row">
+          <input class="f-input" id="new-note-text" placeholder="e.g. Emailed recruiter for update…"/>
+          <button class="btn-sm primary" onclick="addNote()">Add</button>
+        </div>
+      </div>
+
+      <div class="modal-tab-panel" id="tab-docs">
+        <div class="f-section" style="border-top:none;padding-top:0;margin-top:0">Attached Documents</div>
+        <div class="doc-list" id="doc-list"></div>
+        <div class="form-grid">
+          <div class="f-group">
+            <label class="f-label">Document name</label>
+            <input class="f-input" id="new-doc-name" placeholder="Resume v3"/>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Type</label>
+            <select class="f-select" id="new-doc-type">
+              <option>Resume</option>
+              <option>Cover Letter</option>
+              <option>Portfolio</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="f-group span2">
+            <label class="f-label">Link / URL</label>
+            <input class="f-input" id="new-doc-url" placeholder="https://drive.google.com/…"/>
+          </div>
+        </div>
+        <button class="btn-sm ghost" style="margin-top:10px" onclick="addDoc()">+ Attach document</button>
+      </div>
+
+      <div class="modal-tab-panel" id="tab-deadline">
+        <div class="reminder-ui-list-wrap" style="margin-bottom:16px" id="reminder-ui-list"></div>
+        <div class="form-grid">
+          <div class="f-group">
+            <label class="f-label">Reminder type</label>
+            <select class="f-select" id="f-dl-type">
+              <option>Application Deadline</option>
+              <option>Follow-up</option>
+              <option>Interview</option>
+              <option>Offer Deadline</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Due date</label>
+            <input class="f-input" id="f-dl-date" type="date"/>
+          </div>
+        </div>
+        <button class="btn-sm ghost" style="margin-top:10px" onclick="addReminderFromForm()">+ Add reminder</button>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-sm danger" id="delete-btn" style="display:none" onclick="deleteApp()">Delete</button>
+      <button class="btn-sm primary" onclick="saveApp()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="toast-icon">✓</span><span id="toast-msg"></span></div>
+
+<script>
+const API = 'http://localhost:3000/api';
+
+let appCache = [];
+
+async function apiFetch(path, options = {}) {
+  const res = await fetch(API + path, {
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+async function loadApps() {
+  const search = document.getElementById('search-input').value;
+  const status = document.getElementById('status-filter').value;
+  const sort   = document.getElementById('sort-select').value;
+  const params = new URLSearchParams();
+  if (search) params.set('search', search);
+  if (status) params.set('status', status);
+  if (sort)   params.set('sort', sort);
+  appCache = await apiFetch(`/applications?${params}`);
+  return appCache;
+}
+
+const STATUS_CLASS = {
+  'Wishlist':'s-wishlist','Applied':'s-applied','Online Assessment':'s-oa',
+  'Phone Screen':'s-phone','Interview':'s-interview','Offer':'s-offer',
+  'Rejected':'s-rejected','Withdrawn':'s-withdrawn'
+};
+const STATUS_COLOR = {
+  'Wishlist':'#9333ea','Applied':'#185FA5','Online Assessment':'#92400E',
+  'Phone Screen':'#1E40AF','Interview':'#854F0B','Offer':'#3B6D11',
+  'Rejected':'#A32D2D','Withdrawn':'#6b7280'
+};
+const ACTIVE_STATUSES = ['Applied','Online Assessment','Phone Screen','Interview'];
+const FUNNEL_STAGES   = ['Applied','Online Assessment','Phone Screen','Interview','Offer'];
+
+function showView(name, btn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  const titles = { applications:'Applications', reminders:'Reminders & Deadlines', analytics:'Analytics' };
+  document.getElementById('topbar-title').textContent = titles[name] || name;
+  document.getElementById('add-btn').style.display    = name === 'applications' ? '' : 'none';
+  document.getElementById('export-btn').style.display = name === 'applications' ? '' : 'none';
+  if (name === 'analytics') renderAnalytics();
+  if (name === 'reminders') renderReminders();
+}
+
+function updateMetrics() {
+  const apps      = appCache;
+  const total     = apps.length;
+  const active    = apps.filter(a => ACTIVE_STATUSES.includes(a.Status)).length;
+  const interview = apps.filter(a => a.Status === 'Interview').length;
+  const offer     = apps.filter(a => a.Status === 'Offer').length;
+  const responded = apps.filter(a => !['Wishlist','Applied'].includes(a.Status)).length;
+  const applied   = apps.filter(a => a.Status !== 'Wishlist').length;
+  const rate      = applied ? Math.round(responded / applied * 100) : 0;
+  document.getElementById('m-total').textContent     = total;
+  document.getElementById('m-active').textContent    = active;
+  document.getElementById('m-interview').textContent = interview;
+  document.getElementById('m-offer').textContent     = offer;
+  document.getElementById('m-response').textContent  = rate + '%';
+}
+
+function updateDeadlineStrip() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const items = [];
+
+  appCache.forEach(app => {
+    (app.reminders || []).forEach(r => {
+      if (r.Completed) return;
+      const dt = new Date(r.Due_Date + 'T00:00:00'); dt.setHours(0,0,0,0);
+      const diff = Math.round((dt - today) / 86400000);
+      items.push({ app, label: r.Reminder_Type, dt, diff });
+    });
+  });
+
+  items.sort((a, b) => a.dt - b.dt);
+  const container = document.getElementById('deadline-pills');
+  if (!items.length) {
+    container.innerHTML = '<span class="deadline-empty">No deadlines set</span>';
+    return;
+  }
+  container.innerHTML = items.slice(0, 6).map(({ app, label, diff }) => {
+    const cls = diff < 0 ? 'overdue' : diff <= 3 ? 'soon' : 'ok';
+    const txt = diff < 0 ? `${Math.abs(diff)}d overdue` : diff === 0 ? 'Today' : `${diff}d`;
+    return `<span class="deadline-pill ${cls}" onclick="openEdit('${app.ApplicationID}')">${esc(app.CompanyName)} · ${esc(label)}: ${txt}</span>`;
+  }).join('');
+}
+
+
+function renderTable() {
+  const apps = appCache;
+
+  if (!apps.length) {
+    document.getElementById('app-tbody').innerHTML =
+      `<tr><td colspan="7" class="tbl-empty">No applications found. Add one to get started!</td></tr>`;
+    return;
+  }
+
+  document.getElementById('app-tbody').innerHTML = apps.map(app => {
+    const clr      = stringToColor(app.CompanyName);
+    const initial  = (app.CompanyName || '?').slice(0,1).toUpperCase();
+    const dateStr  = app.Date_Applied
+      ? new Date(app.Date_Applied + 'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+      : '—';
+    const earliest = (app.reminders || []).filter(r => !r.Completed).map(r => r.Due_Date).sort()[0];
+    const dlStr    = earliest ? formatDeadline(earliest) : '—';
+    const badgeCls = STATUS_CLASS[app.Status] || 's-applied';
+    const noteCount= (app.notes     || []).length;
+    const docCount = (app.documents || []).length;
+
+    return `<tr class="app-row" onclick="openEdit('${app.ApplicationID}')">
+      <td><span class="co-initial" style="background:${clr}20;color:${clr}">${initial}</span><span class="co-name">${esc(app.CompanyName)}</span></td>
+      <td>${esc(app.RoleTitle)}</td>
+      <td><span class="s-badge ${badgeCls}">${esc(app.Status)}</span></td>
+      <td style="color:var(--muted)">${dateStr}</td>
+      <td style="color:var(--muted)">${dlStr}</td>
+      <td style="color:var(--muted)">${esc(app.InternshipTerm || '—')}</td>
+      <td>
+        <div class="row-actions" onclick="event.stopPropagation()">
+          ${noteCount ? `<span style="font-size:11px;color:var(--muted)">${noteCount} note${noteCount>1?'s':''}</span>` : ''}
+          ${docCount  ? `<span style="font-size:11px;color:var(--muted)">${docCount} doc${docCount>1?'s':''}</span>`   : ''}
+          <button class="row-btn" title="Edit" onclick="openEdit('${app.ApplicationID}')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="row-btn del" title="Delete" onclick="event.stopPropagation();quickDelete('${app.ApplicationID}')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function formatDeadline(dateStr) {
+  const dt    = new Date(dateStr + 'T00:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff  = Math.round((dt - today) / 86400000);
+  if (diff < 0)  return `<span style="color:var(--color-error)">${Math.abs(diff)}d ago</span>`;
+  if (diff === 0) return `<span style="color:#854F0B">Today</span>`;
+  if (diff <= 3)  return `<span style="color:#854F0B">in ${diff}d</span>`;
+  return dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+
+let editingId  = null;
+let tempNotes  = [];
+let tempDocs   = [];
+let tempReminders = [];
+
+function openAdd() {
+  editingId = null;
+  document.getElementById('modal-title').textContent    = 'Add Application';
+  document.getElementById('delete-btn').style.display   = 'none';
+  clearForm();
+  tempNotes = []; tempDocs = []; tempReminders = [];
+  switchModalTab('details', document.querySelector('.modal-tab'));
+  renderNotesUI(); renderDocsUI(); renderRemindersUI();
+  document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('app-modal').classList.add('open');
+}
+
+async function openEdit(id) {
+  try {
+    const app = await apiFetch(`/applications/${id}`);
+    editingId  = id;
+    document.getElementById('modal-title').textContent  = 'Edit — ' + app.CompanyName;
+    document.getElementById('delete-btn').style.display = '';
+    fillForm(app);
+    tempNotes     = [...(app.notes     || [])];
+    tempDocs      = [...(app.documents || [])];
+    tempReminders = [...(app.reminders || [])];
+    switchModalTab('details', document.querySelector('.modal-tab'));
+    renderNotesUI(); renderDocsUI(); renderRemindersUI();
+    document.getElementById('app-modal').classList.add('open');
+  } catch (err) {
+    toast('Failed to load application: ' + err.message, 'warn');
+  }
+}
+
+function closeModal() {
+  document.getElementById('app-modal').classList.remove('open');
+  editingId = null;
+}
+
+function clearForm() {
+  ['f-company','f-role','f-date','f-url','f-notes',
+   'f-contact-name','f-contact-title','f-contact-email','f-contact-linkedin'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('f-status').value = 'Applied';
+  document.getElementById('f-source').value = '';
+}
+
+function fillForm(app) {
+  document.getElementById('f-company').value         = app.CompanyName  || '';
+  document.getElementById('f-role').value            = app.RoleTitle    || '';
+  document.getElementById('f-status').value          = app.Status       || 'Applied';
+  document.getElementById('f-date').value            = app.Date_Applied || '';
+  document.getElementById('f-source').value          = '';
+  document.getElementById('f-url').value             = app.PostingURL   || '';
+  document.getElementById('f-notes').value           = app.Notes        || '';
+  document.getElementById('f-contact-name').value    = '';
+  document.getElementById('f-contact-title').value   = '';
+  document.getElementById('f-contact-email').value   = '';
+  document.getElementById('f-contact-linkedin').value= '';
+}
+
+async function saveApp() {
+  const company = document.getElementById('f-company').value.trim();
+  const role    = document.getElementById('f-role').value.trim();
+  if (!company) { toast('Company name is required', 'warn'); return; }
+  if (!role)    { toast('Role title is required',   'warn'); return; }
+
+  const body = {
+    CompanyName:  company,
+    RoleTitle:    role,
+    PostingURL:   document.getElementById('f-url').value.trim(),
+    Status:       document.getElementById('f-status').value,
+    Date_Applied: document.getElementById('f-date').value,
+    Notes:        document.getElementById('f-notes').value.trim(),
+  };
+
+  try {
+    if (editingId) {
+      await apiFetch(`/applications/${editingId}`, { method:'PUT', body: JSON.stringify(body) });
+
+      const existingNoteIds = (appCache.find(a => a.ApplicationID === editingId)?.notes || []).map(n => n.NoteID);
+      const currentNoteIds  = tempNotes.filter(n => n.NoteID).map(n => n.NoteID);
+      for (const id of existingNoteIds) {
+        if (!currentNoteIds.includes(id)) await apiFetch(`/notes/${id}`, { method:'DELETE' });
+      }
+      for (const n of tempNotes.filter(n => !n.NoteID)) {
+        await apiFetch('/notes', { method:'POST', body: JSON.stringify({ Content: n.Content || n.text, ApplicationID: editingId }) });
+      }
+
+      const existingDocIds = (appCache.find(a => a.ApplicationID === editingId)?.documents || []).map(d => d.DocumentID);
+      const currentDocIds  = tempDocs.filter(d => d.DocumentID).map(d => d.DocumentID);
+      for (const id of existingDocIds) {
+        if (!currentDocIds.includes(id)) await apiFetch(`/documents/${id}`, { method:'DELETE' });
+      }
+      for (const d of tempDocs.filter(d => !d.DocumentID)) {
+        await apiFetch('/documents', { method:'POST', body: JSON.stringify({ Name: d.name || d.Name, Doc_Type: d.type || d.Doc_Type || 'Other', URL: d.url || d.URL || '', ApplicationID: editingId }) });
+      }
+
+      const existingRmIds = (appCache.find(a => a.ApplicationID === editingId)?.reminders || []).map(r => r.ReminderID);
+      const currentRmIds  = tempReminders.filter(r => r.ReminderID).map(r => r.ReminderID);
+      for (const id of existingRmIds) {
+        if (!currentRmIds.includes(id)) await apiFetch(`/reminders/${id}`, { method:'DELETE' });
+      }
+      for (const r of tempReminders.filter(r => !r.ReminderID)) {
+        await apiFetch('/reminders', { method:'POST', body: JSON.stringify({ Due_Date: r.Due_Date, Reminder_Type: r.Reminder_Type, ApplicationID: editingId }) });
+      }
+
+      toast('Application updated!');
+    } else {
+      const created = await apiFetch('/applications', { method:'POST', body: JSON.stringify(body) });
+      const newId   = created.ApplicationID;
+
+      for (const n of tempNotes) {
+        await apiFetch('/notes', { method:'POST', body: JSON.stringify({ Content: n.Content || n.text, ApplicationID: newId }) });
+      }
+      for (const d of tempDocs) {
+        await apiFetch('/documents', { method:'POST', body: JSON.stringify({ Name: d.name || d.Name, Doc_Type: d.type || d.Doc_Type || 'Other', URL: d.url || d.URL || '', ApplicationID: newId }) });
+      }
+      for (const r of tempReminders) {
+        await apiFetch('/reminders', { method:'POST', body: JSON.stringify({ Due_Date: r.Due_Date, Reminder_Type: r.Reminder_Type, ApplicationID: newId }) });
+      }
+
+      toast('Application added!');
+    }
+
+    closeModal();
+    await refresh();
+  } catch (err) {
+    toast('Save failed: ' + err.message, 'warn');
+  }
+}
+
+async function deleteApp() {
+  if (!editingId) return;
+  if (!confirm('Delete this application? This cannot be undone.')) return;
+  try {
+    await apiFetch(`/applications/${editingId}`, { method:'DELETE' });
+    closeModal();
+    await refresh();
+    toast('Application deleted');
+  } catch (err) {
+    toast('Delete failed: ' + err.message, 'warn');
+  }
+}
+
+async function quickDelete(id) {
+  if (!confirm('Delete this application?')) return;
+  try {
+    await apiFetch(`/applications/${id}`, { method:'DELETE' });
+    await refresh();
+    toast('Deleted');
+  } catch (err) {
+    toast('Delete failed: ' + err.message, 'warn');
+  }
+}
+
+function addNote() {
+  const txt = document.getElementById('new-note-text').value.trim();
+  if (!txt) return;
+  // Use a temp object — NoteID is absent until saved to DB
+  tempNotes.unshift({ text: txt, Content: txt, date: new Date().toISOString().slice(0,10), Created_At: new Date().toISOString() });
+  document.getElementById('new-note-text').value = '';
+  renderNotesUI();
+}
+
+function removeNote(idx) {
+  tempNotes.splice(idx, 1);
+  renderNotesUI();
+}
+
+function renderNotesUI() {
+  const container = document.getElementById('note-list');
+  if (!tempNotes.length) {
+    container.innerHTML = '<div style="font-size:13px;color:var(--muted);margin-bottom:8px">No notes yet.</div>';
+    return;
+  }
+  container.innerHTML = tempNotes.map((n, i) => `
+    <div class="note-item">
+      <div class="note-item-header">
+        <span class="note-item-date">${(n.Created_At || n.date || '').slice(0,10)}</span>
+        <button class="note-del" onclick="removeNote(${i})">✕</button>
+      </div>
+      <div class="note-item-text">${esc(n.Content || n.text || '')}</div>
+    </div>`).join('');
+}
+
+function addDoc() {
+  const name = document.getElementById('new-doc-name').value.trim();
+  const type = document.getElementById('new-doc-type').value;
+  const url  = document.getElementById('new-doc-url').value.trim();
+  if (!name) { toast('Please enter a document name', 'warn'); return; }
+  tempDocs.push({ name, Name: name, type, Doc_Type: type, url, URL: url });
+  document.getElementById('new-doc-name').value = '';
+  document.getElementById('new-doc-url').value  = '';
+  renderDocsUI();
+}
+
+function removeDoc(idx) {
+  tempDocs.splice(idx, 1);
+  renderDocsUI();
+}
+
+function renderDocsUI() {
+  const container = document.getElementById('doc-list');
+  if (!tempDocs.length) {
+    container.innerHTML = '<div style="font-size:13px;color:var(--muted);margin-bottom:8px">No documents attached.</div>';
+    return;
+  }
+  container.innerHTML = tempDocs.map((d, i) => {
+    const name = d.Name || d.name || '';
+    const type = d.Doc_Type || d.type || '';
+    const url  = d.URL  || d.url  || '';
+    return `
+    <div class="doc-item">
+      <svg class="doc-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <div>
+        <div class="doc-name">${esc(name)}</div>
+        <div class="doc-type">${esc(type)}</div>
+        ${url ? `<a class="doc-link" href="${esc(url)}" target="_blank" onclick="event.stopPropagation()">${esc(url.slice(0,40))}${url.length>40?'…':''}</a>` : ''}
+      </div>
+      <button class="doc-del" onclick="removeDoc(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function addReminderFromForm() {
+  const date = document.getElementById('f-dl-date').value;
+  const type = document.getElementById('f-dl-type').value;
+  if (!date) { toast('Please pick a date', 'warn'); return; }
+  tempReminders.push({ Due_Date: date, Reminder_Type: type, Completed: 0 });
+  document.getElementById('f-dl-date').value = '';
+  renderRemindersUI();
+}
+
+async function toggleReminder(idx) {
+  const r = tempReminders[idx];
+  if (r.ReminderID) {
+    // Already in DB — toggle via API immediately
+    try {
+      const updated = await apiFetch(`/reminders/${r.ReminderID}/complete`, { method:'PATCH' });
+      tempReminders[idx] = updated;
+    } catch (err) { toast('Failed to update reminder', 'warn'); return; }
+  } else {
+    r.Completed = r.Completed ? 0 : 1;
+  }
+  renderRemindersUI();
+}
+
+function removeReminder(idx) {
+  tempReminders.splice(idx, 1);
+  renderRemindersUI();
+}
+
+function renderRemindersUI() {
+  const container = document.getElementById('reminder-ui-list');
+  if (!container) return;
+  if (!tempReminders.length) {
+    container.innerHTML = '<div style="font-size:13px;color:var(--muted);margin-bottom:8px">No reminders set.</div>';
+    return;
+  }
+  container.innerHTML = tempReminders.map((r, i) => {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const dt    = new Date(r.Due_Date + 'T00:00:00');
+    const diff  = Math.round((dt - today) / 86400000);
+    const clr   = r.Completed ? 'var(--muted)' : diff < 0 ? 'var(--color-error)' : diff <= 3 ? '#854F0B' : 'var(--color-offer-text)';
+    return `
+    <div class="note-item" style="display:flex;align-items:center;gap:10px">
+      <input type="checkbox" ${r.Completed ? 'checked' : ''} onchange="toggleReminder(${i})" style="cursor:pointer"/>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:600;color:${clr};text-decoration:${r.Completed?'line-through':'none'}">${esc(r.Reminder_Type)}</div>
+        <div style="font-size:11px;color:var(--muted)">${r.Due_Date}</div>
+      </div>
+      <button class="note-del" onclick="removeReminder(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function switchModalTab(name, btn) {
+  document.querySelectorAll('.modal-tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.modal-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+async function renderReminders() {
+  const container = document.getElementById('reminder-content');
+  container.innerHTML = '<div style="padding:24px;color:var(--muted)">Loading…</div>';
+  try {
+    const items = await apiFetch('/reminders');
+    const today = new Date(); today.setHours(0,0,0,0);
+
+    const withDiff = items.map(r => {
+      const dt   = new Date(r.Due_Date + 'T00:00:00'); dt.setHours(0,0,0,0);
+      const diff = Math.round((dt - today) / 86400000);
+      return { ...r, dt, diff };
+    });
+
+    const overdue  = withDiff.filter(r => r.diff < 0);
+    const upcoming = withDiff.filter(r => r.diff >= 0 && r.diff <= 7);
+    const later    = withDiff.filter(r => r.diff > 7);
+
+    if (!withDiff.length) {
+      container.innerHTML = '<div class="reminder-empty">No upcoming reminders. Open an application and add reminders in the Deadlines tab.</div>';
+      return;
+    }
+
+    const section = (title, list, dot) => !list.length ? '' : `
+      <div style="margin-bottom:20px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">${title}</div>
+        <div class="reminder-list">
+          ${list.map(r => `
+            <div class="reminder-card" onclick="openEdit('${r.ApplicationID}')">
+              <div class="reminder-dot" style="background:${dot}"></div>
+              <div>
+                <div class="reminder-company">${esc(r.CompanyName || '')}</div>
+                <div class="reminder-desc">${esc(r.RoleTitle || '')} · ${esc(r.Reminder_Type)}</div>
+              </div>
+              <div class="reminder-date" style="color:${dot}">
+                ${r.diff < 0 ? Math.abs(r.diff)+'d overdue' : r.diff === 0 ? 'Today' : 'in '+r.diff+'d'}
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+
+    container.innerHTML =
+      section('Overdue',    overdue,  '#A32D2D') +
+      section('This week',  upcoming, '#854F0B') +
+      section('Coming up',  later,    '#3B6D11');
+  } catch (err) {
+    container.innerHTML = `<div class="reminder-empty">Failed to load reminders: ${err.message}</div>`;
+  }
+}
+
+let timelineChart = null;
+let distChart     = null;
+
+async function renderAnalytics() {
+  try {
+    const data = await apiFetch('/analytics');
+
+    document.getElementById('a-total').textContent          = data.totals.total;
+    document.getElementById('a-response').textContent       = data.totals.responseRate   + '%';
+    document.getElementById('a-interview-rate').textContent = data.totals.interviewRate  + '%';
+    document.getElementById('a-offer-rate').textContent     = data.totals.offerRate      + '%';
+
+    renderTimelineChart(data.timeline);
+    renderFunnelBars(data.funnel);
+    renderDistributionChart(data.statusDistribution);
+  } catch (err) {
+    toast('Analytics failed: ' + err.message, 'warn');
+  }
+}
+
+function renderTimelineChart(timeline) {
+  if (!timeline.length) return;
+  const labels = timeline.map(t => t.week);
+  const data   = timeline.map(t => t.count);
+
+  if (timelineChart) timelineChart.destroy();
+  timelineChart = new Chart(document.getElementById('timeline-chart'), {
+    type: 'bar',
+    data: { labels, datasets:[{ data, backgroundColor:'rgba(83,74,183,0.15)', borderColor:'#534AB7', borderWidth:2, borderRadius:6, hoverBackgroundColor:'rgba(83,74,183,0.3)' }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } },
+      scales: { x:{ grid:{ display:false }, ticks:{ font:{ size:11 }, color:'#6b7280' } }, y:{ grid:{ color:'rgba(0,0,0,0.05)' }, ticks:{ font:{ size:11 }, color:'#6b7280', stepSize:1 } } } }
+  });
+}
+
+function renderFunnelBars(funnel) {
+  const max = funnel[0]?.count || 1;
+  const colors = ['#534AB7','#7F77DD','#185FA5','#854F0B','#3B6D11'];
+  document.getElementById('funnel-bars').innerHTML = funnel.map((f, i) => {
+    const pct     = Math.round(f.count / max * 100);
+    const convPct = i > 0 && funnel[i-1].count ? Math.round(f.count / funnel[i-1].count * 100) : null;
+    return `<div class="funnel-row">
+      <span class="funnel-label">${esc(f.stage)}</span>
+      <div class="funnel-bar-wrap">
+        <div class="funnel-bar" style="width:${pct}%;background:${colors[i]}">
+          ${f.count > 0 ? `<span class="funnel-count">${f.count}</span>` : ''}
+        </div>
+      </div>
+      <span class="funnel-pct">${convPct !== null ? convPct+'%' : ''}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderDistributionChart(dist) {
+  const labels = dist.map(d => d.Status);
+  const counts = dist.map(d => d.count);
+  const colors = labels.map(s => STATUS_COLOR[s] || '#888');
+  const total  = counts.reduce((a,b) => a+b, 0) || 1;
+
+  if (distChart) distChart.destroy();
+  distChart = new Chart(document.getElementById('dist-chart'), {
+    type: 'doughnut',
+    data: { labels, datasets:[{ data:counts, backgroundColor:colors.map(c=>c+'33'), borderColor:colors, borderWidth:2 }] },
+    options: { responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{ legend:{ display:false } } }
+  });
+
+  document.getElementById('dist-list').innerHTML = dist.map(d => `
+    <div class="dist-row">
+      <div class="dist-dot" style="background:${STATUS_COLOR[d.Status]||'#888'}"></div>
+      <span class="dist-name">${esc(d.Status)}</span>
+      <span class="dist-count">${d.count}</span>
+      <span class="dist-pct">${Math.round(d.count/total*100)}%</span>
+    </div>`).join('');
+}
+
+function exportCSV() {
+  const apps    = appCache;
+  const headers = ['Company','Role','Status','Date Applied','Posting URL','Notes'];
+  const rows    = apps.map(a => [
+    a.CompanyName, a.RoleTitle, a.Status, a.Date_Applied, a.PostingURL, a.Notes
+  ].map(v => `"${(v||'').replace(/"/g,'""')}"`));
+  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const el  = document.createElement('a');
+  el.href   = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  el.download = 'applytrack_export.csv';
+  el.click();
+  toast('CSV exported!');
+}
+
+async function refresh() {
+  try {
+    await loadApps();
+    updateMetrics();
+    updateDeadlineStrip();
+    renderTable();
+  } catch (err) {
+    toast('Could not reach server. Is it running on port 3000?', 'warn');
+  }
+}
+
+
+function toast(msg, type) {
+  document.getElementById('toast-msg').textContent = msg;
+  document.querySelector('.toast-icon').textContent = type === 'warn' ? '⚠' : '✓';
+  const el = document.getElementById('toast');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+function esc(str) {
+  return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function stringToColor(str) {
+  let hash = 0;
+  for (let i = 0; i < (str||'').length; i++) hash = str.charCodeAt(i) + ((hash<<5)-hash);
+  const palette = ['#534AB7','#185FA5','#854F0B','#3B6D11','#A32D2D','#0F6E56','#6B21A8','#1E40AF'];
+  return palette[Math.abs(hash) % palette.length];
+}
+
+document.getElementById('app-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+document.getElementById('search-input').addEventListener('input',  () => refresh());
+document.getElementById('status-filter').addEventListener('change', () => refresh());
+document.getElementById('sort-select').addEventListener('change',   () => refresh());
+
+refresh();
+</script>
+</body>
+</html>
