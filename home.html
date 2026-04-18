@@ -3,514 +3,431 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ApplyTrack - Job Application Tracker</title>
+  <title>ApplyTrack — Job Application Tracker</title>
+  <link rel="stylesheet" href="css/styles.css" />
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
 
-    body {
-      background-color: #f9fafb;
-      color: #111827;
-      line-height: 1.6;
-    }
-
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
-
-    .container {
-      width: 90%;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    /* Navbar */
-    header {
-      background: white;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 0;
-    }
-
-    .logo {
-      font-size: 24px;
-      font-weight: bold;
-      color: #4f46e5;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 25px;
-      align-items: center;
-    }
-
-    .nav-links a {
-      font-size: 16px;
-      color: #374151;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 12px 22px;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: bold;
-      transition: 0.3s;
-    }
-
-    .btn-primary {
-      background-color: #4f46e5;
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background-color: #4338ca;
-    }
-
-    .btn-secondary {
-      border: 1px solid #4f46e5;
-      color: #4f46e5;
-      background-color: white;
-    }
-
-    .btn-secondary:hover {
-      background-color: #eef2ff;
-    }
-
-    /* Hero */
     .hero {
-      padding: 80px 0;
-      background: white;
-    }
-
-    .hero-content {
       display: flex;
-      justify-content: space-between;
+      gap: 48px;
       align-items: center;
-      gap: 40px;
+      padding: 72px 32px 56px;
+      background: var(--bg);
       flex-wrap: wrap;
     }
-
     .hero-text {
       flex: 1;
       min-width: 300px;
+      animation: slideLeft 0.7s ease both;
     }
-
     .hero-text h1 {
-      font-size: 48px;
-      margin-bottom: 20px;
-      color: #111827;
+      font-family: var(--font-display);
+      font-size: clamp(34px, 4vw, 48px);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 18px;
+      color: var(--text);
     }
-
+    .hero-text h1 em {
+      font-style: normal;
+      color: var(--purple-600);
+    }
     .hero-text p {
-      font-size: 18px;
-      margin-bottom: 30px;
-      color: #4b5563;
+      font-size: 16px;
+      color: var(--muted);
+      margin-bottom: 28px;
+      line-height: 1.75;
+      max-width: 440px;
     }
-
-    .hero-buttons {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
+    .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+    .hero-stats { display: flex; gap: 28px; margin-top: 40px; flex-wrap: wrap; }
+    .hero-stat-num {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--purple-600);
     }
+    .hero-stat-label { font-size: 12px; color: var(--muted); margin-top: 1px; }
 
-    .hero-image {
+    .hero-visual {
       flex: 1;
       min-width: 300px;
-      background: #eef2ff;
-      border: 2px dashed #c7d2fe;
-      border-radius: 16px;
-      padding: 40px;
-      text-align: center;
+      animation: slideRight 0.7s ease 0.15s both;
     }
-
-    .hero-image h3 {
-      margin-bottom: 15px;
-      color: #3730a3;
+    .mock {
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      animation: float 4s ease-in-out infinite;
+      box-shadow: var(--shadow-md);
     }
-
-    /* Section */
-    section {
-      padding: 70px 0;
-    }
-
-    .section-title {
-      text-align: center;
-      font-size: 34px;
-      margin-bottom: 20px;
-    }
-
-    .section-subtitle {
-      text-align: center;
-      color: #6b7280;
-      margin-bottom: 50px;
-      font-size: 17px;
-    }
-
-    /* Problem / Solution */
-    .two-column {
-      display: flex;
-      gap: 30px;
-      flex-wrap: wrap;
-    }
-
-    .card {
-      flex: 1;
-      min-width: 280px;
-      background: white;
-      padding: 30px;
-      border-radius: 14px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
-
-    .card h3 {
-      margin-bottom: 15px;
-      font-size: 24px;
-    }
-
-    .card ul {
-      padding-left: 20px;
-    }
-
-    .card ul li {
-      margin-bottom: 10px;
-      color: #374151;
-    }
-
-    /* Features */
-    .features-grid {
-      display: flex;
-      gap: 25px;
-      flex-wrap: wrap;
-    }
-
-    .feature-card {
-      flex: 1;
-      min-width: 250px;
-      background: white;
-      padding: 25px;
-      border-radius: 14px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      text-align: center;
-    }
-
-    .feature-card h3 {
-      margin-bottom: 12px;
-      color: #111827;
-    }
-
-    .feature-card p {
-      color: #6b7280;
-    }
-
-    /* Dashboard Preview */
-    .dashboard-preview {
-      background: white;
-      padding: 30px;
-      border-radius: 14px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    table th,
-    table td {
-      padding: 14px;
-      text-align: left;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    table th {
-      background-color: #f3f4f6;
-    }
-
-    /* CTA */
-    .cta {
-      background-color: #4f46e5;
-      color: white;
-      text-align: center;
-      border-radius: 16px;
-      padding: 60px 20px;
-    }
-
-    .cta h2 {
-      font-size: 36px;
-      margin-bottom: 20px;
-    }
-
-    .cta p {
-      margin-bottom: 25px;
-      font-size: 18px;
-    }
-
-    .cta .btn-primary {
-      background-color: white;
-      color: #4f46e5;
-    }
-
-    .cta .btn-primary:hover {
-      background-color: #e5e7eb;
-    }
-
-    /* Footer */
-    footer {
-      background: white;
-      border-top: 1px solid #e5e7eb;
-      padding: 30px 0;
-      margin-top: 60px;
-    }
-
-    .footer-content {
+    .mock-bar { display: flex; align-items: center; gap: 6px; margin-bottom: 16px; }
+    .mock-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .mock-bar-title { font-size: 12px; font-weight: 600; color: var(--muted); margin-left: 4px; }
+    .mock-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 20px;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      margin-bottom: 6px;
+      animation: rowIn 0.4s ease both;
     }
+    .mock-row:nth-child(2) { animation-delay: 0.5s; }
+    .mock-row:nth-child(3) { animation-delay: 0.7s; }
+    .mock-row:nth-child(4) { animation-delay: 0.9s; }
+    .mock-row:nth-child(5) { animation-delay: 1.1s; }
+    .mock-co  { font-size: 13px; font-weight: 600; color: var(--text); }
+    .mock-role { font-size: 12px; color: var(--muted); }
+    .mock-prog { margin-top: 14px; }
+    .mock-prog-label { font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+    .mock-prog-bar { height: 4px; background: var(--border); border-radius: var(--radius-pill); overflow: hidden; }
+    .mock-prog-fill { height: 100%; border-radius: var(--radius-pill); background: var(--purple-600); transition: width 1.2s cubic-bezier(0.22,1,0.36,1); }
 
-    .footer-links {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
+    .two-col { display: flex; gap: 20px; flex-wrap: wrap; }
+    .col {
+      flex: 1;
+      min-width: 260px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 26px;
     }
+    .col h3 {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    .col-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 11px; font-size: 14px; color: var(--gray-700); line-height: 1.5; }
+    .col-icon { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; margin-top: 1px; font-weight: 700; }
+    .col-icon-x    { background: var(--color-rejected-bg); color: var(--color-rejected-text); }
+    .col-icon-check { background: var(--color-offer-bg);   color: var(--color-offer-text); }
 
-    .footer-links a {
-      color: #4b5563;
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+
+    .dash { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .dash-head { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--bg-alt); }
+    .dash-head-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .filter-group { display: flex; gap: 6px; }
+    .filter-btn { font-size: 11px; padding: 4px 10px; border-radius: var(--radius-pill); border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all var(--ease); font-family: var(--font-body); }
+    .filter-btn.active { background: var(--purple-50); color: var(--purple-800); border-color: var(--purple-200); }
+    .at-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .at-table th { padding: 10px 20px; text-align: left; font-size: 11px; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--border); background: var(--bg-alt); }
+    .at-table td { padding: 11px 20px; border-bottom: 1px solid var(--border); color: var(--text); }
+    .at-table tr:last-child td { border-bottom: none; }
+    .at-table tr { transition: background var(--ease); }
+    .at-table tr:hover td { background: var(--bg-alt); }
+    .co-logo { width: 26px; height: 26px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; margin-right: 8px; vertical-align: middle; }
+
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 28px; }
+
+    .cta {
+      background: var(--purple-600);
+      border-radius: var(--radius-xl);
+      padding: 60px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
     }
+    .cta-orb { position: absolute; border-radius: 50%; pointer-events: none; }
+    .cta-orb-1 { width: 200px; height: 200px; background: rgba(255,255,255,0.07); top: -60px; left: -60px; }
+    .cta-orb-2 { width: 260px; height: 260px; background: rgba(255,255,255,0.05); bottom: -80px; right: -60px; }
+    .cta h2 { font-family: var(--font-display); font-size: 30px; font-weight: 800; color: #fff; margin-bottom: 10px; position: relative; }
+    .cta p  { font-size: 15px; color: var(--purple-100); margin-bottom: 28px; position: relative; }
 
     @media (max-width: 768px) {
-      .navbar,
-      .hero-content,
-      .two-column,
-      .features-grid,
-      .footer-content {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .hero-text h1 {
-        font-size: 36px;
-      }
-
-      .section-title {
-        font-size: 28px;
-      }
-
-      .cta h2 {
-        font-size: 28px;
-      }
+      .hero { flex-direction: column; padding: 40px 20px; }
+      .hero-text h1 { font-size: 32px; }
+      .two-col { flex-direction: column; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Navbar -->
-  <header>
-    <div class="container navbar">
-      <div class="logo">ApplyTrack</div>
-      <nav class="nav-links">
-        <a href="#features">Features</a>
-        <a href="#dashboard">Dashboard</a>
-        <a href="#about">About</a>
-        <a href="#" class="btn btn-secondary">Login</a>
-        <a href="#" class="btn btn-primary">Sign Up</a>
-      </nav>
+  <nav class="at-nav">
+    <div class="at-logo">
+      <span class="at-logo-dot"></span>
+      ApplyTrack
     </div>
-  </header>
+    <div class="at-nav-links">
+      <a href="#features">Features</a>
+      <a href="#dashboard">Dashboard</a>
+      <a href="#about">About</a>
+      <a href="auth.html" class="btn-outline">Login</a>
+      <a href="auth.html" class="btn-primary">Sign up</a>
+    </div>
+  </nav>
 
-  <!-- Hero Section -->
   <section class="hero">
-    <div class="container hero-content">
-      <div class="hero-text">
-        <h1>Track your job applications. Land offers faster.</h1>
-        <p>
-          Stay organized during recruiting season by managing applications,
-          tracking statuses, and saving important notes all in one place.
-        </p>
-        <div class="hero-buttons">
-          <a href="#" class="btn btn-primary">Get Started Free</a>
-          <a href="#" class="btn btn-secondary">View Demo</a>
-        </div>
+    <div class="hero-text">
+      <div class="hero-badge" style="margin-bottom:16px;">
+        <span class="hero-badge-dot"></span> Now in open beta
       </div>
-
-      <div class="hero-image">
-        <h3>Dashboard Preview</h3>
-        <p>Mockup image or screenshot goes here</p>
+      <h1>Track your applications.<br><em>Land offers faster.</em></h1>
+      <p>Stay organized during recruiting season — manage applications, monitor statuses, and store important notes all in one clean dashboard.</p>
+      <div class="hero-btns">
+        <a href="auth.html" class="btn-primary lg">Get started free</a>
+        <a href="#dashboard" class="btn-outline lg">View demo</a>
       </div>
-    </div>
-  </section>
-
-  <!-- Problem / Solution -->
-  <section>
-    <div class="container">
-      <h2 class="section-title">Applying shouldn’t feel chaotic</h2>
-      <p class="section-subtitle">
-        Keep everything organized so you can focus on landing interviews.
-      </p>
-
-      <div class="two-column">
-        <div class="card">
-          <h3>The Problem</h3>
-          <ul>
-            <li>Losing track of applications</li>
-            <li>Forgetting follow-up dates</li>
-            <li>Scattered notes across different apps</li>
-            <li>No clear view of recruiting progress</li>
-          </ul>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-num">2,400+</div>
+          <div class="hero-stat-label">Students using ApplyTrack</div>
         </div>
-
-        <div class="card">
-          <h3>The Solution</h3>
-          <ul>
-            <li>Centralized application dashboard</li>
-            <li>Track each stage of the process</li>
-            <li>Store notes and recruiter details</li>
-            <li>Stay consistent and organized</li>
-          </ul>
+        <div>
+          <div class="hero-stat-num">18k</div>
+          <div class="hero-stat-label">Applications tracked</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">94%</div>
+          <div class="hero-stat-label">Reported staying organized</div>
         </div>
       </div>
     </div>
-  </section>
 
-  <!-- Features -->
-  <section id="features">
-    <div class="container">
-      <h2 class="section-title">Core Features</h2>
-      <p class="section-subtitle">
-        Everything you need for a simple MVP application tracker.
-      </p>
-
-      <div class="features-grid">
-        <div class="feature-card">
-          <h3>Application Tracking</h3>
-          <p>Add companies, roles, dates applied, and keep all your applications in one place.</p>
+    <div class="hero-visual">
+      <div class="mock">
+        <div class="mock-bar">
+          <div class="mock-dot" style="background:#E24B4A;"></div>
+          <div class="mock-dot" style="background:#EF9F27;"></div>
+          <div class="mock-dot" style="background:#639922;"></div>
+          <span class="mock-bar-title">My applications</span>
         </div>
-
-        <div class="feature-card">
-          <h3>Status Management</h3>
-          <p>Track progress from Applied to Interview, Offer, or Rejected.</p>
+        <div class="mock-row">
+          <div><div class="mock-co">Google</div><div class="mock-role">Software Engineer Intern</div></div>
+          <span class="badge badge-applied">Applied</span>
         </div>
-
-        <div class="feature-card">
-          <h3>Notes & Contacts</h3>
-          <p>Save recruiter contact info, reminders, and interview notes for each application.</p>
+        <div class="mock-row">
+          <div><div class="mock-co">Amazon</div><div class="mock-role">SDE Intern</div></div>
+          <span class="badge badge-interview">Interview</span>
+        </div>
+        <div class="mock-row">
+          <div><div class="mock-co">Meta</div><div class="mock-role">Frontend Intern</div></div>
+          <span class="badge badge-offer">Offer</span>
+        </div>
+        <div class="mock-row">
+          <div><div class="mock-co">Stripe</div><div class="mock-role">PM Intern</div></div>
+          <span class="badge badge-rejected">Rejected</span>
+        </div>
+        <div class="mock-prog">
+          <div class="mock-prog-label">Season progress — 4 of 12 resolved</div>
+          <div class="mock-prog-bar"><div class="mock-prog-fill" id="prog" style="width:0%;"></div></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Dashboard Preview -->
-  <section id="dashboard">
-    <div class="container">
-      <h2 class="section-title">Everything you need, in one dashboard</h2>
-      <p class="section-subtitle">
-        View all your applications in one organized place.
-      </p>
+  <hr class="at-divider">
 
-      <div class="dashboard-preview">
-        <table>
-          <thead>
-            <tr>
-              <th>Company</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Date Applied</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Google</td>
-              <td>Software Engineer Intern</td>
-              <td>Applied</td>
-              <td>Mar 20, 2026</td>
-            </tr>
-            <tr>
-              <td>Amazon</td>
-              <td>SDE Intern</td>
-              <td>Interview</td>
-              <td>Mar 24, 2026</td>
-            </tr>
-            <tr>
-              <td>Meta</td>
-              <td>Frontend Intern</td>
-              <td>Offer</td>
-              <td>Mar 27, 2026</td>
-            </tr>
-          </tbody>
-        </table>
+  <section class="section section-alt sr">
+    <div class="section-center" style="margin-bottom:40px;">
+      <div class="section-label">Why it matters</div>
+      <div class="section-title">Applying shouldn't feel chaotic</div>
+      <div class="section-sub">Keep everything in one place so you can focus on what actually matters — landing interviews.</div>
+    </div>
+    <div class="two-col">
+      <div class="col">
+        <h3>Without ApplyTrack</h3>
+        <div class="col-item"><span class="col-icon col-icon-x">✕</span> Losing track of where you applied</div>
+        <div class="col-item"><span class="col-icon col-icon-x">✕</span> Forgetting follow-up deadlines</div>
+        <div class="col-item"><span class="col-icon col-icon-x">✕</span> Notes scattered across apps and docs</div>
+        <div class="col-item"><span class="col-icon col-icon-x">✕</span> No visibility into recruiting progress</div>
+      </div>
+      <div class="col">
+        <h3>With ApplyTrack</h3>
+        <div class="col-item"><span class="col-icon col-icon-check">✓</span> Centralized application dashboard</div>
+        <div class="col-item"><span class="col-icon col-icon-check">✓</span> Track each stage of the process</div>
+        <div class="col-item"><span class="col-icon col-icon-check">✓</span> Store notes and recruiter contacts</div>
+        <div class="col-item"><span class="col-icon col-icon-check">✓</span> Stay consistent all season long</div>
       </div>
     </div>
   </section>
 
-  <!-- About / Value -->
-  <section id="about">
-    <div class="container">
-      <h2 class="section-title">Built for students chasing internships</h2>
-      <p class="section-subtitle">
-        ApplyTrack helps internship seekers stay focused, organized, and consistent throughout recruiting season.
-      </p>
+  <hr class="at-divider">
 
-      <div class="features-grid">
-        <div class="feature-card">
-          <h3>Stay Organized</h3>
-          <p>Manage companies, roles, and deadlines without messy spreadsheets.</p>
+  <section class="section sr" id="features">
+    <div class="section-center" style="margin-bottom:40px;">
+      <div class="section-label">Features</div>
+      <div class="section-title">Everything you need in one place</div>
+      <div class="section-sub">Built lean for students — no bloat, just the tools you actually use during recruiting season.</div>
+    </div>
+    <div class="features-grid">
+      <div class="card-feat">
+        <div class="feat-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="14" height="12" rx="2" stroke="#534AB7" stroke-width="1.2"/><path d="M5 6h6M5 9h4" stroke="#534AB7" stroke-width="1.2" stroke-linecap="round"/></svg>
         </div>
-
-        <div class="feature-card">
-          <h3>Save Time</h3>
-          <p>Quickly check where you stand with each company in seconds.</p>
+        <h3>Application tracking</h3>
+        <p>Add companies, roles, and dates applied. Every application in one organized list.</p>
+      </div>
+      <div class="card-feat">
+        <div class="feat-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#534AB7" stroke-width="1.2"/><path d="M8 5v3.5l2 1.5" stroke="#534AB7" stroke-width="1.2" stroke-linecap="round"/></svg>
         </div>
-
-        <div class="feature-card">
-          <h3>Increase Consistency</h3>
-          <p>Keep a steady application process and avoid missing follow-ups.</p>
+        <h3>Status management</h3>
+        <p>Track every stage from Applied to Interview, Offer, or Rejected at a glance.</p>
+      </div>
+      <div class="card-feat">
+        <div class="feat-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3h10a1 1 0 011 1v7a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="#534AB7" stroke-width="1.2"/><path d="M2 6h12" stroke="#534AB7" stroke-width="1.2"/></svg>
         </div>
+        <h3>Notes and contacts</h3>
+        <p>Save recruiter info, reminders, and interview notes for each application.</p>
+      </div>
+      <div class="card-feat">
+        <div class="feat-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-4 3 3 5-6" stroke="#534AB7" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Progress insights</h3>
+        <p>See your season at a glance — response rates, pipeline stages, and activity.</p>
       </div>
     </div>
   </section>
 
-  <!-- CTA -->
-  <section>
-    <div class="container">
-      <div class="cta">
-        <h2>Ready to land your next offer?</h2>
-        <p>Start tracking your applications and stay on top of recruiting season.</p>
-        <a href="#" class="btn btn-primary">Get Started Free</a>
+  <hr class="at-divider">
+
+  <section class="section section-alt sr" id="dashboard">
+    <div class="section-center" style="margin-bottom:32px;">
+      <div class="section-label">Dashboard</div>
+      <div class="section-title">Your whole season, in one view</div>
+      <div class="section-sub">Everything organized, nothing forgotten.</div>
+    </div>
+    <div class="metrics-grid">
+      <div class="metric"><div class="metric-num">12</div><div class="metric-label">Applications sent</div></div>
+      <div class="metric"><div class="metric-num">4</div><div class="metric-label">Interviews scheduled</div></div>
+      <div class="metric"><div class="metric-num">1</div><div class="metric-label">Offers received</div></div>
+      <div class="metric"><div class="metric-num">67%</div><div class="metric-label">Response rate</div></div>
+    </div>
+    <div class="dash">
+      <div class="dash-head">
+        <span class="dash-head-title">All applications</span>
+        <div class="filter-group">
+          <button class="filter-btn active">All</button>
+          <button class="filter-btn">Interview</button>
+          <button class="filter-btn">Offer</button>
+        </div>
+      </div>
+      <table class="at-table">
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Date applied</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="co-logo" style="background:#E6F1FB;color:#185FA5;">G</span>Google</td>
+            <td>Software Engineer Intern</td>
+            <td><span class="badge badge-applied">Applied</span></td>
+            <td style="color:var(--muted);">Mar 20, 2026</td>
+          </tr>
+          <tr>
+            <td><span class="co-logo" style="background:#FAEEDA;color:#854F0B;">A</span>Amazon</td>
+            <td>SDE Intern</td>
+            <td><span class="badge badge-interview">Interview</span></td>
+            <td style="color:var(--muted);">Mar 24, 2026</td>
+          </tr>
+          <tr>
+            <td><span class="co-logo" style="background:#EEEDFE;color:#3C3489;">M</span>Meta</td>
+            <td>Frontend Intern</td>
+            <td><span class="badge badge-offer">Offer</span></td>
+            <td style="color:var(--muted);">Mar 27, 2026</td>
+          </tr>
+          <tr>
+            <td><span class="co-logo" style="background:#EAF3DE;color:#3B6D11;">S</span>Stripe</td>
+            <td>PM Intern</td>
+            <td><span class="badge badge-rejected">Rejected</span></td>
+            <td style="color:var(--muted);">Apr 1, 2026</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <hr class="at-divider">
+
+  <section class="section sr" id="about">
+    <div class="section-center" style="margin-bottom:40px;">
+      <div class="section-label">About</div>
+      <div class="section-title">Built for students chasing internships</div>
+      <div class="section-sub">ApplyTrack helps internship seekers stay focused, organized, and consistent throughout recruiting season.</div>
+    </div>
+    <div class="features-grid">
+      <div class="card-feat">
+        <div class="feat-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="#534AB7" stroke-width="1.2"/><path d="M5 8h6M8 5v6" stroke="#534AB7" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Stay organized</h3>
+        <p>Manage companies, roles, and deadlines without messy spreadsheets.</p>
+      </div>
+      <div class="card-feat">
+        <div class="feat-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13 3L6 10l-3-3" stroke="#534AB7" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Save time</h3>
+        <p>Quickly check where you stand with each company in seconds.</p>
+      </div>
+      <div class="card-feat">
+        <div class="feat-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#534AB7" stroke-width="1.2"/><path d="M8 5v3h3" stroke="#534AB7" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Increase consistency</h3>
+        <p>Keep a steady application process and never miss a follow-up.</p>
       </div>
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer>
-    <div class="container footer-content">
-      <div>
-        <h3 class="logo">ApplyTrack</h3>
-        <p>Track internships. Stay organized. Land offers.</p>
-      </div>
+  <hr class="at-divider">
 
-      <div class="footer-links">
-        <a href="#features">Features</a>
-        <a href="#dashboard">Dashboard</a>
-        <a href="#about">About</a>
-        <a href="#">GitHub</a>
-        <a href="#">Contact</a>
-      </div>
+  <section class="section section-alt sr">
+    <div class="cta">
+      <div class="cta-orb cta-orb-1"></div>
+      <div class="cta-orb cta-orb-2"></div>
+      <h2>Ready to land your next offer?</h2>
+      <p>Join thousands of students staying organized this recruiting season.</p>
+      <a href="auth.html" class="btn-white">Get started free</a>
+    </div>
+  </section>
+
+  <footer class="at-footer">
+    <div>
+      <div class="footer-logo">ApplyTrack</div>
+      <div class="footer-tagline">Track internships. Stay organized. Land offers.</div>
+    </div>
+    <div class="footer-links">
+      <a href="#features">Features</a>
+      <a href="#dashboard">Dashboard</a>
+      <a href="#about">About</a>
+      <a href="#">GitHub</a>
+      <a href="#">Contact</a>
     </div>
   </footer>
+
+  <script>
+    setTimeout(() => {
+      const p = document.getElementById('prog');
+      if (p) p.style.width = '33%';
+    }, 800);
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.sr').forEach(el => observer.observe(el));
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  </script>
 
 </body>
 </html>
